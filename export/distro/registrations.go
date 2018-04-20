@@ -40,6 +40,7 @@ func newRegistrationInfo() *registrationInfo {
 }
 
 func (reg *registrationInfo) update(newReg export.Registration) bool {
+	logger.Info("**** In update ****")
 	reg.registration = newReg
 
 	reg.format = nil
@@ -54,6 +55,9 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 		// TODO reg.format = distro.NewIotCoreFormat()
 	case export.FormatAzureJSON:
 		// TODO reg.format = distro.NewAzureFormat()
+	case export.FormatFORUMJSON:
+		logger.Info("Setting FORUM format")
+		reg.format = NewFORUMFormat()
 	case export.FormatCSV:
 		// TODO reg.format = distro.NewCsvFormat()
 	default:
@@ -86,6 +90,8 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 		// TODO reg.sender = distro.NewAzureSender("TODO URL")
 	case export.DestRest:
 		reg.sender = NewHTTPSender(newReg.Addressable)
+	case export.DestFORUM:
+		reg.sender = NewFORUMHTTPSender(newReg.Addressable)
 	default:
 		logger.Warn("Destination not supported: ", zap.String("destination", newReg.Destination))
 		return false
@@ -149,7 +155,7 @@ func (reg registrationInfo) processEvent(event *models.Event) {
 		encrypted = reg.encrypt.Transform(compressed)
 	}
 
-	reg.sender.Send(encrypted)
+	reg.sender.Send(event, encrypted)
 	logger.Debug("Sent event with registration:",
 		zap.Any("Event", event),
 		zap.String("Name", reg.registration.Name))

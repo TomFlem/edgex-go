@@ -28,6 +28,7 @@ const (
 	FormatSerialized  = "SERIALIZED"
 	FormatIoTCoreJSON = "IOTCORE_JSON"
 	FormatAzureJSON   = "AZURE_JSON"
+	FormatFORUMJSON   = "FORUM_JSON"
 	FormatCSV         = "CSV"
 )
 
@@ -38,6 +39,7 @@ const (
 	DestIotCoreMQTT = "IOTCORE_TOPIC"
 	DestAzureMQTT   = "AZURE_TOPIC"
 	DestRest        = "REST_ENDPOINT"
+	DestFORUM       = "FORUM_ENDPOINT"
 )
 
 // Registration - Defines the registration details
@@ -85,6 +87,7 @@ func (reg *Registration) Validate() (bool, error) {
 		reg.Format != FormatSerialized &&
 		reg.Format != FormatIoTCoreJSON &&
 		reg.Format != FormatAzureJSON &&
+		reg.Format != FormatFORUMJSON &&
 		reg.Format != FormatCSV {
 		return false, fmt.Errorf("Format invalid: %s", reg.Format)
 	}
@@ -93,7 +96,8 @@ func (reg *Registration) Validate() (bool, error) {
 		reg.Destination != DestZMQ &&
 		reg.Destination != DestIotCoreMQTT &&
 		reg.Destination != DestAzureMQTT &&
-		reg.Destination != DestRest {
+		reg.Destination != DestRest &&
+		reg.Destination != DestFORUM {
 		return false, fmt.Errorf("Destination invalid: %s", reg.Destination)
 	}
 

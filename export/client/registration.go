@@ -74,9 +74,11 @@ func getRegList(w http.ResponseWriter, r *http.Request) {
 	case "formats":
 		list = append(list, export.FormatJSON)
 		list = append(list, export.FormatXML)
+		list = append(list, export.FormatFORUMJSON)
 	case "destinations":
 		list = append(list, export.DestMQTT)
 		list = append(list, export.DestRest)
+		list = append(list, export.DestFORUM)
 	default:
 		logger.Error("Unknown type: " + t)
 		w.WriteHeader(http.StatusBadRequest)
