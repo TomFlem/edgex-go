@@ -30,6 +30,7 @@ const (
 	FormatAzureJSON       = "AZURE_JSON"
 	FormatCSV             = "CSV"
 	FormatThingsBoardJSON = "THINGSBOARD_JSON"
+	FormatFORUMJSON   = "FORUM_JSON"
 )
 
 // Export destination types
@@ -40,6 +41,7 @@ const (
 	DestAzureMQTT   = "AZURE_TOPIC"
 	DestRest        = "REST_ENDPOINT"
 	DestXMPP        = "XMPP_TOPIC"
+	DestFORUM       = "FORUM_ENDPOINT"
 )
 
 // Registration - Defines the registration details
@@ -92,6 +94,7 @@ func (reg *Registration) Validate() (bool, error) {
 		reg.Format != FormatIoTCoreJSON &&
 		reg.Format != FormatAzureJSON &&
 		reg.Format != FormatCSV &&
+		reg.Format != FormatFORUMJSON &&
 		reg.Format != FormatThingsBoardJSON {
 		return false, fmt.Errorf("Format invalid: %s", reg.Format)
 	}
@@ -100,7 +103,8 @@ func (reg *Registration) Validate() (bool, error) {
 		reg.Destination != DestZMQ &&
 		reg.Destination != DestIotCoreMQTT &&
 		reg.Destination != DestAzureMQTT &&
-		reg.Destination != DestRest {
+		reg.Destination != DestRest &&
+		reg.Destination != DestFORUM {
 		return false, fmt.Errorf("Destination invalid: %s", reg.Destination)
 	}
 
