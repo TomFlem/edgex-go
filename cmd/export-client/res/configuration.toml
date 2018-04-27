@@ -1,6 +1,7 @@
 ApplicationName = 'export-client'
 Hostname = '127.0.0.1'
 Port = 48071
+DBType = 'mongodb'
 MongoURL = '0.0.0.0'
 MongoUsername = ''
 MongoPassword = ''
@@ -8,7 +9,7 @@ MongoDatabase = 'coredata'
 MongoPort = 27017
 MongoConnectTimeout = 5000
 MongoSocketTimeout = 5000
-ConsulHost ='127.0.0.1'
+ConsulHost = 'localhost'
 ConsulPort = 8500
 CheckInterval = '10s'
 ConsulProfilesActive = 'go'
