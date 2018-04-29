@@ -40,6 +40,7 @@ type InfluxClient struct {
 
 // Return a pointer to the InfluxClient
 func newInfluxClient(config DBConfiguration) (*InfluxClient, error) {
+    fmt.Println("Creaing InfluxDB client...")
 	// Create the dial info for the Influx session
 	connectionString := "http://" + config.Host + ":" + strconv.Itoa(config.Port)
 	influxdbHTTPInfo := client.HTTPConfig{
@@ -750,6 +751,10 @@ func (ic *InfluxClient) getValueDescriptors(q string) ([]models.ValueDescriptor,
 }
 
 func (ic *InfluxClient) addValueDescriptorToDB(db string, collection string, v *models.ValueDescriptor) error {
+    // DEBUG
+    fmt.Println("addValueDescriptorToDB()")
+    //
+
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  db,
 		Precision: "us",

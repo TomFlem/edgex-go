@@ -1,8 +1,8 @@
 ApplicationName = 'core-metadata'
 DBType = 'mongodb'
 MongoDatabaseName = 'metadata'
-MongoDBUserName = ''
-MongoDBPassword = ''
+MongoDBUserName = 'meta'
+MongoDBPassword = 'password'
 MongoDBHost = 'localhost'
 MongoDBPort = 27017
 MongoDBConnectTimeout = 5000

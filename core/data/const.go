@@ -32,6 +32,14 @@ type ConfigurationStruct struct {
 	ServiceName                string
 	DeviceUpdateLastConnected  bool
 	ServiceUpdateLastConnected bool
+    //
+	InfluxDBUserName           string
+	InfluxDBPassword           string
+	InfluxDatabaseName         string
+	InfluxDBHost               string
+	InfluxDBPort               int
+	InfluxDBConnectTimeout     int
+    //
 	MongoDBUserName            string
 	MongoDBPassword            string
 	MongoDatabaseName          string
