@@ -481,13 +481,13 @@ func (ic *InfluxClient) addReadingToDB(db string, collection string, r *models.R
 		"created":  r.Created,
 		"origin":   r.Origin,
 		"modified": r.Modified,
+		"value":    r.Value,
 	}
 
 	tags := map[string]string{
 		"id" : r.Id.Hex(),
 		"device":   r.Device,
 		"name":     r.Name,
-		"value":    r.Value,
 	}
 
 	pt, err := client.NewPoint(
