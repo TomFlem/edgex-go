@@ -68,13 +68,20 @@ func Init(conf ConfigurationStruct, l logger.LoggingClient) error {
 	
 	// Create a database client
 	dbc, err = clients.NewDBClient(clients.DBConfiguration{
-		DbType:       clients.MONGO,
-		Host:         conf.MongoDBHost,
-		Port:         conf.MongoDBPort,
-		Timeout:      conf.MongoDBConnectTimeout,
-		DatabaseName: conf.MongoDatabaseName,
-		Username:     conf.MongoDBUserName,
-		Password:     conf.MongoDBPassword,
+		DbType:       clients.INFLUX,
+		Host:         conf.InfluxDBHost,
+		Port:         conf.InfluxDBPort,
+		Timeout:      conf.InfluxDBConnectTimeout,
+		DatabaseName: conf.InfluxDatabaseName,
+		Username:     conf.InfluxDBUserName,
+		Password:     conf.InfluxDBPassword,
+//		DbType:       clients.MONGO,
+//		Host:         conf.MongoDBHost,
+//		Port:         conf.MongoDBPort,
+//		Timeout:      conf.MongoDBConnectTimeout,
+//		DatabaseName: conf.MongoDatabaseName,
+//		Username:     conf.MongoDBUserName,
+//		Password:     conf.MongoDBPassword,
 	})
 	if err != nil {
 		return fmt.Errorf("couldn't connect to database: %v", err.Error())
