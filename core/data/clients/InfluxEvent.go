@@ -139,7 +139,7 @@ func (ie *InfluxEvent) Set(raw bson.Raw) error {
 				reading.Device = res[0].Series[0].Values[0][i].(string)
 			case "name":
 				reading.Name = res[0].Series[0].Values[0][i].(string)
-			case "value":
+			case "value2":
 				reading.Value = res[0].Series[0].Values[0][i].(string)
 			}
 		}

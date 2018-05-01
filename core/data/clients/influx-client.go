@@ -403,7 +403,7 @@ func (ic *InfluxClient) ReadingsByDevice(id string, limit int) ([]models.Reading
 // Return a list of readings for the given value descriptor
 // Limit by the given limit
 func (ic *InfluxClient) ReadingsByValueDescriptor(name string, limit int) ([]models.Reading, error) {
-	query := fmt.Sprintf("WHERE name = '%s' LIMIT %d", name, limit) 
+	query := fmt.Sprintf("WHERE \"name\" = '%s' LIMIT %d", name, limit) 
 	return ic.getReadings(query)
 }
 
@@ -411,7 +411,7 @@ func (ic *InfluxClient) ReadingsByValueDescriptor(name string, limit int) ([]mod
 func (ic *InfluxClient) ReadingsByValueDescriptorNames(names []string, limit int) ([]models.Reading, error) {
 	var readings []models.Reading
 	for _, name := range names {
-		query := fmt.Sprintf("WHERE name = '%s' LIMIT %d", name, limit) 
+		query := fmt.Sprintf("WHERE \"name\" = '%s' LIMIT %d", name, limit) 
 		rlist, err := ic.getReadings(query)
 		if err != nil {
 			return readings, err
@@ -476,12 +476,19 @@ func (ic *InfluxClient) addReadingToDB(db string, collection string, r *models.R
 	if err != nil {
 		return err
 	}
+
+    // convert reading value to float64
+    f, err := strconv.ParseFloat(r.Value, 64)
+	if err != nil {
+		return err
+	}
+
 	fields := map[string]interface{}{
 		"pushed":   r.Pushed,
 		"created":  r.Created,
 		"origin":   r.Origin,
 		"modified": r.Modified,
-		"value":    r.Value,
+		"value2":   f,
 	}
 
 	tags := map[string]string{
@@ -537,7 +544,7 @@ func parseReading(res client.Result) (models.Reading, error){
 			reading.Device = res.Series[0].Values[0][i].(string)
 		case "name":
 			reading.Name = res.Series[0].Values[0][i].(string)
-		case "value":
+		case "value2":
 			reading.Value = res.Series[0].Values[0][i].(string)
 		}
 	}
@@ -556,7 +563,7 @@ func (ic *InfluxClient) AddValueDescriptor(v models.ValueDescriptor) (bson.Objec
 	v.Created = time.Now().UnixNano() / int64(time.Millisecond)
 
 	// See if the name is unique and add the value descriptors
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE 'name' = '%s'", VALUE_DESCRIPTOR_COLLECTION, v.Name)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE \"name\" = '%s'", VALUE_DESCRIPTOR_COLLECTION, v.Name)
 	num, err := ic.getValueDescriptorsCount(query)
 	if err != nil {
 		return v.Id, err
@@ -695,7 +702,12 @@ func (ic *InfluxClient) getValueDescriptorsCount(query string)(int, error) {
 	if len(res[0].Series) < 1 {
 		return 0, nil
 	}
-	return res[0].Series[0].Values[0][1].(int), nil
+	// return res[0].Series[0].Values[0][1].(int), nil
+    n, err := res[0].Series[0].Values[0][1].(json.Number).Int64()
+    if err != nil {
+        return 0, err
+    }
+	return int(n), nil
 }
 
 func (ic *InfluxClient) deleteValueDescriptorBy(query string) error {
