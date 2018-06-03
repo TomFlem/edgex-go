@@ -69,3 +69,11 @@ func (thingsboardjsonTr thingsboardJSONFormatter) Format(event *models.Event) []
 	}
 	return b
 }
+
+type noopFormatter struct {
+}
+
+func (noopTr noopFormatter) Format(event *models.Event) []byte {
+	var ret []byte
+	return ret
+}
