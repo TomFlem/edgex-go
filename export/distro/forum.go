@@ -3,6 +3,7 @@ package distro
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/gob"
 	"strconv"
 	"io"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type forumFormater struct {
+type forumFormatter struct {
 }
 
 type WriteObjectRequest struct {
@@ -22,31 +23,46 @@ type WriteObjectRequest struct {
 	} `json:"mode"`
 }
 
-func (jsonTr forumFormater) Format(event *models.Event) []byte {
+type RequestSequence struct {
+	Reqs [][]byte
+}
+
+func (jsonTr forumFormatter) Format(event *models.Event) []byte {
 	logger.Info("**** FORUM FORMAT ****")
 	if len(event.Readings) == 0 {
 		logger.Error("No reading in event")
 		return nil
 	}
-	v, err := strconv.ParseFloat(event.Readings[0].Value, 64)
-	if err != nil {
-		logger.Error("Error parsing reading value", zap.Error(err))
-		return nil
+	rs := RequestSequence{}
+	rs.Reqs = make([][]byte, len(event.Readings))
+	for i := 0; i < len(event.Readings); i++ {
+		v, err := strconv.ParseFloat(event.Readings[i].Value, 64)
+		if err != nil {
+			logger.Error("Error parsing reading value", zap.Error(err))
+			return nil
+		}
+		req := WriteObjectRequest{}
+		req.Mode.Value = v
+		req.Mode.Origin = event.Readings[i].Origin
+		b, err := json.Marshal(req)
+		logger.Info("Forum data", zap.ByteString("data", b))
+		if err != nil {
+			logger.Error("Error parsing JSON", zap.Error(err))
+			return nil
+		}
+		rs.Reqs[i] = b
 	}
-	req := WriteObjectRequest{}
-	req.Mode.Value = v
-	req.Mode.Origin = event.Readings[0].Origin
-	b, err := json.Marshal(req)
-	logger.Info("Forum data", zap.ByteString("data", b))
+	buf := new(bytes.Buffer)
+	err := gob.NewEncoder(buf).Encode(rs)
 	if err != nil {
-		logger.Error("Error parsing JSON", zap.Error(err))
-		return nil
+			logger.Error("Error encoding readings", zap.Error(err))
+			return nil
 	}
-	return b
+	return buf.Bytes()
 }
 
-func NewFORUMFormat() Formater {
-	return forumFormater{}
+func NewFORUMFormat() Formatter {
+	return forumFormatter{}
 }
 
 type forumHttpSender struct {
@@ -79,15 +95,24 @@ func (sender forumHttpSender) Send(event *models.Event, data []byte) {
 		if len(event.Readings) == 0 {
 			logger.Error("No reading in event")
 		}
-		url := sender.url + "/" + event.Readings[0].Device + "-" + event.Readings[0].Name
-		response, err := put(url, mimeTypeJSON, bytes.NewReader(data))
+		buf := bytes.NewBuffer(data)
+		rs := RequestSequence{}
+		err := gob.NewDecoder(buf).Decode(&rs)
 		if err != nil {
-			logger.Error("Error: ", zap.Error(err))
+			logger.Error("Error decoding: ", zap.Error(err))
 			return
 		}
-		defer response.Body.Close()
-		logger.Info("Response: ", zap.String("status", response.Status))
-		logger.Info("Sent put data: ", zap.ByteString("data", data))
+		for i := 0; i < len(event.Readings); i++ {
+			url := sender.url + "/" + event.Readings[i].Device + "-" + event.Readings[i].Name
+			response, err := put(url, mimeTypeJSON, bytes.NewReader(rs.Reqs[i]))
+			if err != nil {
+				logger.Error("Error: ", zap.Error(err))
+				return
+			}
+			defer response.Body.Close()
+			logger.Info("Response: ", zap.String("status", response.Status))
+			logger.Info("Sent put data: ", zap.ByteString("data", data))
+		}
 	} else {
 		sender.httpSender.Send(event, data)
 	}
