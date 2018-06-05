@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"io"
 	"net/http"
+	"math"
 	"time"
 
 	"github.com/edgexfoundry/edgex-go/core/domain/models"
@@ -44,10 +45,13 @@ func (jsonTr forumFormatter) Format(event *models.Event) []byte {
 		req := WriteObjectRequest{}
 		req.Mode.Value = v
 		req.Mode.Origin = event.Readings[i].Origin
+		if math.IsNaN(req.Mode.Value) {
+			req.Mode.Value = 0;
+		}
 		b, err := json.Marshal(req)
 		logger.Info("Forum data", zap.ByteString("data", b))
 		if err != nil {
-			logger.Error("Error parsing JSON", zap.Error(err))
+			logger.Error("Error marshaling JSON", zap.Error(err))
 			return nil
 		}
 		rs.Reqs[i] = b
