@@ -66,5 +66,6 @@ func Init(conf ConfigurationStruct, l logger.LoggingClient, useConsul bool) {
 
 	mdc = metadata.NewDeviceClient(params, types.Endpoint{})
 	params.Path = conf.MetaCommandPath
+	params.Url = conf.MetaCommandURL
 	cc = metadata.NewCommandClient(params, types.Endpoint{})
 }
